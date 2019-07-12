@@ -104,5 +104,34 @@
 
     </script>
 
+    <script>
+    
+       $('.icon-tuichu').click(function(){
+
+            $.post({
+
+               url:'http://localhost:8000/admin/logout',
+
+               success:function(backData){
+                   
+                 if( backData.code == 200 ){
+                     location.href = 'login.html';
+                 }
+                  
+               }
+
+
+
+            })
+
+
+
+       })
+    
+    
+    
+    
+    </script>
+
 </body>
 </html>

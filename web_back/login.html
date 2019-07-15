@@ -57,21 +57,17 @@
 
     <script>
         $(function () {
-
             $('.input_sub').click(function (e) {
-
                 e.preventDefault();
                 var name = $('.input_txt').val().trim();
                 var password = $('.input_pass').val().trim();
                 $.post({
-
                     url: 'http://localhost:8000/admin/login',
                     data: {
                         'user_name': name,
                         'password': password,
                     },
                     success: function (backData) {
-
                         if (name == '' && password == '') {
                             // alert('账号或密码为空');
                             $('.modal-body').text(' 账号或密码为空');
@@ -79,11 +75,9 @@
                                 keyboard: true,
                             })
                             return;
-
                         } if (backData.code == 200) {
                             alert(backData.msg);
-                            location.href = 'index.html';
-                            
+                            location.href = 'index.html';   
                         } else {
                             // alert('账号或密码错误');
                             $('.modal-body').text(' 账号或密码错误');
@@ -91,11 +85,8 @@
                                 keyboard: true,
                             })
                         }
-
                     }
-
                 })
-
             })
 
 

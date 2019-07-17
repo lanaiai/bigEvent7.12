@@ -104,7 +104,7 @@
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-default" id="model_shutoff">关闭</button>
-                    <button type="button" class="btn btn-primary" id="model_add">新增</button>
+                    <button type="button" class="btn btn-primary " id="model_add">新增</button>
                 </div>
             </div>
         </div>
@@ -144,24 +144,13 @@
     
     </script>
 
-    <!-- <script type="text/html" id="hotLa">
-
-        <tr>
-            <td>{{nameOne}}</td>
-            <td>{{slugOne}}</td>
-            <td class="text-center">
-                <a href="javascript:editTr({&quot;id&quot;:&quot;1&quot;,&quot;slug&quot;:&quot;uncategorized&quot;,&quot;name&quot;:&quot;未分类&quot;});"
-                    class="btn btn-info btn-xs">编辑</a>
-                <a href="#" data-Id="{{id}}" class="btn btn-danger btn-xs btn-Delett">删除</a>
-            </td>
-        </tr>
-    
-    </script> -->
 
     <script>
         $(function () {
 
             //打开页面调用接口展示数据封装成函数
+            //利用模板生成一个tr，把返回的数据中的id自定义到编辑和删除中后面有用
+            //生成的每一个tr的编辑和删除都带有id
             function getData() {
                 $.get({
                     url: 'http://localhost:8000/admin/category_search',
@@ -177,27 +166,30 @@
             getData(); //打开页面调用接口展示数据
 
 
-            //模态框弹出后给新增或者编辑注册时间
+
+
+            //点击模态框里的‘新增’添加点击事件
             $('#model_add').click(function () {
-                //点击新增后判断这个模态框有没有这个类，有这个类就是编辑（编辑和新增用的是同一个模态框）
-                if ($(this).hasClass('btn-primary')) {  //btn-primary这新增的类型，没有这个类型就执行方框下代码（编辑）
+                //判断这个模态框‘新增’有没有这个类，有这个类就是编辑，没有就是新增（编辑和新增用的是同一个模态框）
+                if ($(this).hasClass('btn-success')) {  //有这个类就执行方框下代码（编辑）
                     //var name = $('.modal-body .name').val();
                     //var slug = $('.modal-body .slug').val();
                     //var id =  $('.modal-body .id').val();
                     //如果获取上面的这些用户修改的信息有很多,那这样不好，用serialize
-                    var dataOne = $('.modal-body form').serialize();
+                    var dataOne = $('.modal-body form').serialize(); //从form取到name,slug和id的值，发请求给服务器修改数据
                     $.post({
-                        url:'http://localhost:8000/admin/category_edit',
-                        data:dataOne,
-                        success:function(backData){
-                            alert('修改成功');
-                            getData(); //重新打开页面调用接口展示数据
+                        url: 'http://localhost:8000/admin/category_edit',
+                        data: dataOne,
+                        success: function (backData) {
+                            if (backData.code == 200) {
+                                alert('修改成功');
+                                getData(); //重新打开页面调用接口展示数据
+                            }
                         }
-                        
-                    })
+                    });
 
 
-                } else { //有btn-primary这新增的类型，就执行方框下代码 （新增）
+                } else { //没有这个类就执行方框下代码 （新增）
                     var name = $('#recipient-name').val();
                     var slug = $('#recipient-slug').val();
                     $.post({       //调用接口内存中新增数据
@@ -209,12 +201,6 @@
                         success: function (backData) {
                             console.log(backData);
                             if (backData.code == 200) { //数据新增成功后调用函数刷新页面 ，这样新增数据利用模板生成带有ID
-                                // var obj = {
-                                //     nameOne: name,
-                                //     slugOne: slug
-                                // };
-                                // var b = template('hotLa', obj);
-                                // $('tbody').append(b);
                                 getData();
                             }
                         }
@@ -226,6 +212,33 @@
             });
 
 
+            //需求:点击新增分类 按钮,模态框中的title和按钮还原.
+            $('.btnAddCate').on('click', function () {
+                $('#addModal .modal-title').html('新增分类');
+                $('#model_add').text('新增').removeClass('btn-success');
+                $('.modal-body .id').val('');
+                $('.modal-body .name').val('');
+                $('.modal-body .slug').val(''); 
+            })
+
+
+            // 编辑文章弹出框样式修改
+            $('tbody').on('click', '.btn-Addla', function () {
+                //点编辑弹出模态框，样式修改
+                $('#addModal .modal-title').html('修改分类');
+                $('#model_add').text('修改').addClass('btn-success');
+
+                //点编辑获取name和slug和id
+                var slug = $(this).parent().prev().text();
+                var name = $(this).parent().prev().prev().text();
+                var id = $(this).attr('data-Id');
+                //去模态框里找到三个input，加一个name属性，name=id，name=name,name=slug发请求要用，才可以获取到值,并在class里也加一个类名（id，name，slug），用来找到这三个input
+                $('.modal-body .id').val(id);
+                $('.modal-body .name').val(name);
+                $('.modal-body .slug').val(slug);  //把name和slug和id显示在弹出的模态框里
+                $('#addModal').modal('show');
+
+            });
 
             // 删除文章类别
             $('tbody').on('click', '.btn-Delett', function () {   //事件托管，点击事件写在父元素上
@@ -241,35 +254,6 @@
                     },
                 })
             });
-
-            // 编辑文章弹出框样式新增
-
-            $('.btnAddCate').on('click', function () {
-                $('#addModal .modal-title').html('新增分类');
-                $('.btn-primary').text('新增').addClass('label-info');
-
-            })
-
-            // 编辑文章弹出框样式修改
-            $('tbody').on('click', '.btn-Addla', function () {
-                //点编辑弹出模态框，样式修改
-                $('#addModal .modal-title').html('修改分类');
-                $('.btn-primary').text('修改').addClass('label-success');
-                $('#addModal').modal('show');
-                //点编辑获取name和slug和id
-                var slug = $(this).parent().prev().text();
-                var name = $(this).parent().prev().prev().text();
-                var id = $(this).attr('data-Id');
-                //去模态框里找到input，加name属性，发请求要用，才可以获取到值,并在class里加类名，用来找到这三个input
-                $('.modal-body .id').val(id);
-                $('.modal-body .name').val(name);
-                $('.modal-body .slug').val(slug);  //把name和slug和id显示在弹出的模态框里
-
-
-
-            })
-
-
 
         })
 
